@@ -19,9 +19,10 @@ var lacdb;
 
 //App
 var app = express();
-var server = require('http').Server(app);
+var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
+app.use('port', process.env.PORT || 3000);
 app.use(cors({
     allowedHeaders: 'Content-Type, Cache-Control, application/json'
 }));
@@ -659,7 +660,7 @@ function addFriend(user, friend) {
     });
 }
 
-app.listen(3000, () => {
+server.listen(app.get('port'), () => {
     new Promise((resolve, reject) => {
         mongodb.connect((err, client) => {
             if (err) {
@@ -669,8 +670,8 @@ app.listen(3000, () => {
         })
     }).then((client) => {
         lacdb = client.db('liteanticheat')
-        console.log("App listen in port 3000");
-        server.listen(3001);
+        console.log(`Server on port ${app.get('port')}`);
+        
     })
 })
 
