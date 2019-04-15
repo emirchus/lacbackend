@@ -187,10 +187,9 @@ io.on('connection', function (socket) {
     })
 });
 
-app.post('/server', (req, res) => {
-    res.send({
-        serverStatus: "All are online."
-    })
+app.get('/', (req, res) => {
+    res.set('Content-Type', 'text/html');
+    res.send(new Buffer('<h2>All online</h2>'));
 })
 
 app.post('/signup', (req, res) => {

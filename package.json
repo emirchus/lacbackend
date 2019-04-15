@@ -2,9 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main.js",
+  "main": "main.js",
   "scripts": {
-    "start": "src/main.js"
+    "start": "node main.js",
+    "test": "IP=0.0.0.0 PORT=3030 mocha --timeout 5000 tests/*_test.js"
   },
   "author": "",
   "license": "ISC",
