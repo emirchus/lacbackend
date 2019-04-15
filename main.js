@@ -190,7 +190,11 @@ io.on('connection', function (socket) {
 
 app.get('/', (req, res) => {
     res.set('Content-Type', 'text/html');
-    res.send(new Buffer('<h2>All online</h2>'));
+    if(lacdb){
+        res.send(`Server: \n Online`);
+    }else{
+        res.send(`Server: \n Disable`);
+    }
 })
 
 app.post('/signup', (req, res) => {
@@ -661,8 +665,7 @@ server.listen(app.get('port'), () => {
         })
     }).then((client) => {
         lacdb = client.db('liteanticheat')
-        console.log(`Server on port ${app.get('port')}`);
-        
+        console.log(`Server on port ${app.get('port')}`);        
     })
 })
 
