@@ -13,8 +13,8 @@ var accountsTokens = [];
 
 //MongoDB
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://owner:EBHdwNn2sn8uiJRv@liteandb-kxcmm.mongodb.net/test?retryWrites=true";
-const mongodb = new MongoClient(uri, { useNewUrlParser: true })
+const mongodb_uri = "mongodb+srv://owner:EBHdwNn2sn8uiJRv@liteandb-kxcmm.mongodb.net/test?retryWrites=true";
+const mongodb = new MongoClient(mongodb_uri, { useNewUrlParser: true })
 var lacdb;
 
 //App
@@ -22,7 +22,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.set('port', 3000);
+app.set('port', process.env.PORT || 3000);
 app.use(cors({
     allowedHeaders: 'Content-Type, Cache-Control, application/json'
 }));
@@ -655,13 +655,12 @@ function addFriend(user, friend) {
     });
 }
 
-app.listen(app.get('port'), () => {
+server.listen(app.get('port'), () => {
     mongodb.connect((err, client) => {
         if (err) {
             console.log(err);
         }
         lacdb = client.db('liteanticheat')
-        server.listen(3001)
         console.log(`Server on port ${app.get('port')}`);
     })
 })
