@@ -567,7 +567,7 @@ app.post('/getuser', (req, res) => {
     var user = req.body.user;
     const usersCollections = lacdb.collection('clients');
     if (user) {
-        usersCollections.findOne({ username: user }, (err, result) => {
+        usersCollections.findOne({ 'usernamelower': user }, (err, result) => {
             if (err)
                 res.send(err)
             var get = {
