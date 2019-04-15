@@ -19,7 +19,7 @@ var lacdb;
 
 //App
 var app = express();
-var server = require('http').Server(app);
+var server = require('https').Server(app);
 var io = require('socket.io')(server);
 
 app.set('port', process.env.PORT || 3000);
@@ -190,9 +190,9 @@ io.on('connection', function (socket) {
 
 app.get('/', (req, res) => {
     res.set('Content-Type', 'text/html');
-    if(lacdb){
+    if (lacdb) {
         res.send(`Server: \n Online \n Server on: ${app.get('port')}`);
-    }else{
+    } else {
         res.send(`Server: \n Disable \n Server on: ${app.get('port')}`);
     }
 })
@@ -656,21 +656,13 @@ function addFriend(user, friend) {
 }
 
 app.listen(app.get('port'), () => {
-    new Promise((resolve, reject) => {
-        mongodb.connect((err, client) => {
-            if (err) {
-                console.log(err);
-            }
-            resolve(client)
-        })
-    }).then((client) => {
+    mongodb.connect((err, client) => {
+        if (err) {
+            console.log(err);
+        }
         lacdb = client.db('liteanticheat')
-        server.listen(3001)      
-        console.log(`Server on port ${app.get('port')}`);  
-    }).catch(() => {
-        //lacdb = client.db('liteanticheat')
-        server.listen(3001)      
-        console.log(`Server on port ${app.get('port')} without port`);  
+        server.listen(3001)
+        console.log(`Server on port ${app.get('port')}`);
     })
 })
 
