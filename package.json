@@ -16,7 +16,7 @@
     "express": "^4.16.4",
     "filereader": "^0.10.3",
     "fs": "0.0.1-security",
-    "mongodb": "^3.2.2",
+    "mongodb": "^3.2.3",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.9",
     "request": "^2.88.0",
