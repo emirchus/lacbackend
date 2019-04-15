@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "nodemon src/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "filereader": "^0.10.3",
+    "fs": "0.0.1-security",
+    "mongodb": "^3.2.2",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.18.9",
+    "request": "^2.88.0",
+    "socket.io": "^2.2.0"
+  }
+}
