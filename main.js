@@ -314,15 +314,6 @@ app.post('/signin', (req, res) => {
 
 })
 
-app.post('/leave', (req, res) => {
-    var id = req.body.session;
-    const usersCollections = lacdb.collection('clients');
-    const exists = accountsTokens.find(a => a.sessionid === id);
-    if (id && exists) {
-        usersCollections.updateOne({ "_id": exists.id }, { $set: { "status": false } })
-        res.send('updated status');
-    }
-})
 
 app.post('/verifiedaccount', (req, res) => {
     var token = req.body.token;
@@ -357,7 +348,7 @@ app.post('/authenticate', (req, res) => {
 })
 
 app.post('/updates/get', (req, res) => {
-    let updatesRaw = fs.readFileSync(__dirname + '/../../LiteAntiCheatFront/src/components/pages/blog/posts/News.json');
+    let updatesRaw = fs.readFileSync(__dirname + "/News.json");
     res.send(JSON.parse(updatesRaw))
 
 })
