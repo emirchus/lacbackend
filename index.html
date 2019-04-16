@@ -187,18 +187,18 @@
                     "password": ps
                 }
 
-
-                fetch("https://lacservices.herokuapp.com/updates/post", {
+  fetch("https://lacservices.herokuapp.com/updates/post", {
                     method: "POST",
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(post)})
-                }).then((res) => { return res.json() })
+                    .then((res) => { return res.json() })
                     .then(data => {
                         console.log(data);
                     })
+
 
             });
 
