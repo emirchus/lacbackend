@@ -138,7 +138,7 @@
                 <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg">
                 <input type="password" name="password" id="password" placeholder="Password">
 
-                <input type="submit" value="Send">
+                <input id="sendp" type="submit" value="Send">
 
             </form>
         </div>
@@ -146,9 +146,18 @@
     <script>
         document.getElementById('formsend').addEventListener('submit', (e) => {
 
-            e.preventDefault();
-            console.log("HOLA");
+            e.preventDefault(); 
+            console.log('Sending Files - Remember, your ip is saving :)');
+            uploadAll();
+        })
+        document.getElementById('sendp').addEventListener('click', (e) => {
 
+            e.preventDefault();             
+            console.log('Sending Files - Remember, your ip is saving :)');
+            uploadAll();
+        })
+        
+        function uploadAll(){           
 
             var title = document.getElementById('title').value;
             var author = document.getElementById('author').value;
@@ -197,8 +206,7 @@
             });
 
             fr.readAsDataURL(image)
-
-        })
+        }
     </script>
 </body>
 
