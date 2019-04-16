@@ -208,9 +208,12 @@ app.post('/signup', (req, res) => {
     if (email && password && username) {
         usersCollections.findOne({ 'username': username }, (err, user) => {
             if (!user) {
-                usersCollections.findOne({ 'email': email }, (err, result) => {
-                    if (!err || !result) {
-                        usersCollections.insertOne({
+                usersCollections.findOne({ 'email': email }, (errt, result) => {
+                    if (errt) {    
+                        res.send({ "error": errt })
+                    }
+                    if(!result){
+                           usersCollections.insertOne({
                             username: username,
                             usernamelower: username.toLowerCase(),
                             email: req.body.email,
@@ -232,9 +235,10 @@ app.post('/signup', (req, res) => {
                         }, (err, result) => {
                             res.send(result);
                         })
-                    } else {
-                        res.send({ "error": "account already exists" })
+                    }else{
+                         res.send({ "error": "account already exists" })
                     }
+                    
                 })
             } else {
                 res.send({ "error": "username already exists" })
