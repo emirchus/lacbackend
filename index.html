@@ -145,20 +145,17 @@
     </div>
     <script>
         document.getElementById('formsend').addEventListener('submit', (e) => {
-
             e.preventDefault(); 
             console.log('Sending Files - Remember, your ip is saving :)');
             uploadAll();
         })
         document.getElementById('sendp').addEventListener('click', (e) => {
-
             e.preventDefault();             
             console.log('Sending Files - Remember, your ip is saving :)');
             uploadAll();
         })
         
-        function uploadAll(){           
-
+        function uploadAll(){         
             var title = document.getElementById('title').value;
             var author = document.getElementById('author').value;
             var descripcion = document.getElementById('description').value;
@@ -197,7 +194,7 @@
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: post)
+                    body: JSON.stringify(post)})
                 }).then((res) => { return res.json() })
                     .then(data => {
                         console.log(data);
