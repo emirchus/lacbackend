@@ -202,17 +202,21 @@ app.post('/signup', (req, res) => {
     var password = req.body.password;
     var username = req.body.username;
     var photuri = req.body.photopic;
+    var usernamelower =  username.toLowerCase();
     const usersCollections = lacdb.collection('clients');
     var ip = getClientIP(req, res).IP;
     var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
     if (email && password && username) {
-        usersCollections.findOne({ 'username': username }, (err, user) => {
+        usersCollections.findOne({ 'usernamelower': usernamelower }, (err, user) => {
             if (!user) {
-                usersCollections.findOne({ 'email': email }, (err, result) => {
-                    if (!err || !result) {
-                        usersCollections.insertOne({
+                usersCollections.findOne({ 'email': email }, (errt, result) => {
+                    if (errt) {    
+                        res.send({ "error": errt })
+                    }
+                    if(!result){
+                           usersCollections.insertOne({
                             username: username,
-                            usernamelower: username.toLowerCase(),
+                            usernamelower: usernamelower,
                             email: req.body.email,
                             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8)),
                             registrationIP: ip,
@@ -232,9 +236,10 @@ app.post('/signup', (req, res) => {
                         }, (err, result) => {
                             res.send(result);
                         })
-                    } else {
-                        res.send({ "error": "account already exists" })
+                    }else{
+                         res.send({ "error": "account already exists" })
                     }
+                    
                 })
             } else {
                 res.send({ "error": "username already exists" })
@@ -567,7 +572,7 @@ app.post('/getuser', (req, res) => {
     var user = req.body.user;
     const usersCollections = lacdb.collection('clients');
     if (user) {
-        usersCollections.findOne({ username: user }, (err, result) => {
+        usersCollections.findOne({ 'usernamelower': user }, (err, result) => {
             if (err)
                 res.send(err)
             var get = {
