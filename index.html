@@ -161,6 +161,14 @@
             var yyyy = today.getFullYear();
 
 
+                var monthNames = [
+                    "Jan", "Feb", "Mar",
+                    "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct",
+                    "Nov", "Dec"
+                ];
+
+                var date = dd + '-' + monthNames[mm] + '-' + yyyy
             var fr = new FileReader();
 
             fr.addEventListener('load', function (e) {
@@ -174,28 +182,13 @@
                 }
 
 
-                var monthNames = [
-                    "Jan", "Feb", "Mar",
-                    "Apr", "May", "Jun", "Jul",
-                    "Aug", "Sep", "Oct",
-                    "Nov", "Dec"
-                ];
-
-                var date = dd + '-' + monthNames[mm] + '-' + yyyy
                 fetch("https://lacservices.herokuapp.com/updates/post", {
                     method: "POST",
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        "author": author,
-                        "title": title,
-                        "date": date,
-                        "image": image,
-                        "description": descripcion,
-                        "password": ps
-                    })
+                    body: post)
                 }).then((res) => { return res.json() })
                     .then(data => {
                         console.log(data);
