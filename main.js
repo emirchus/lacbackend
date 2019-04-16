@@ -202,11 +202,12 @@ app.post('/signup', (req, res) => {
     var password = req.body.password;
     var username = req.body.username;
     var photuri = req.body.photopic;
+    var usernamelower =  username.toLowerCase();
     const usersCollections = lacdb.collection('clients');
     var ip = getClientIP(req, res).IP;
     var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
     if (email && password && username) {
-        usersCollections.findOne({ 'username': username }, (err, user) => {
+        usersCollections.findOne({ 'usernamelower': usernamelower }, (err, user) => {
             if (!user) {
                 usersCollections.findOne({ 'email': email }, (errt, result) => {
                     if (errt) {    
@@ -215,7 +216,7 @@ app.post('/signup', (req, res) => {
                     if(!result){
                            usersCollections.insertOne({
                             username: username,
-                            usernamelower: username.toLowerCase(),
+                            usernamelower: usernamelower,
                             email: req.body.email,
                             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8)),
                             registrationIP: ip,
