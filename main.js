@@ -16,7 +16,7 @@ const MongoClient = require('mongodb').MongoClient;
 const mongodb_uri = "mongodb+srv://owner:EBHdwNn2sn8uiJRv@liteandb-kxcmm.mongodb.net/test?retryWrites=true";
 const mongodb = new MongoClient(mongodb_uri, { useNewUrlParser: true })
 var lacdb;
-
+var postdb;
 //App
 var app = express();
 var server = require('http').createServer(app);
@@ -34,6 +34,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 //Middlewares
 
 var count = 0;
+
 
 io.on('connection', function (socket) {
     count++
@@ -197,6 +198,13 @@ app.get('/', (req, res) => {
     }
 })
 
+app.get('/post', (req, res) => {
+    res.set('Content-Type', 'text/html');
+    if (lacdb) {
+        res.sendFile(path.join(__dirname+"/index.html"));
+    }
+})
+
 app.post('/signup', (req, res) => {
     let email = req.body.email;
     var password = req.body.password;
@@ -357,8 +365,13 @@ app.post('/authenticate', (req, res) => {
 })
 
 app.post('/updates/get', (req, res) => {
-    let updatesRaw = fs.readFileSync(__dirname + "/News.json");
-    res.send(JSON.parse(updatesRaw))
+    const db = lacdb.collection('posts');
+    db.find({}).toArray((err, docs) => {
+        if(err){
+            res.send("error on find posts")
+        }
+        res.send(docs)
+    })
 
 })
 
@@ -369,23 +382,32 @@ app.post('/updates/post', (req, res) => {
     var description = req.body.description;
     var image = req.body.image;
     var pass = req.body.password
+
+    const db = lacdb.collection('posts');
     if (author && title && date && description && image && pass && pass === "letpost666") {
         request.get('https://minotar.net/avatar/' + author, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                data = "data:" + response.headers["content-type"] + ";base64," + new Buffer(body).toString('base64');
-                /*  var updatesFile = JSON.parse(fs.readFileSync(__dirname + '/../../LiteAntiCheatFront/src/components/pages/blog/posts/News.json'));
-                  updatesFile.updates.push({
-                      title: title,
-                      DateTime: date,
-                      Author: author,
-                      Description: description,
-                      AuthorImage: data,
-                      Images: image
-                  })
-  
-                  fs.writeFileSync(__dirname + '/../../LiteAntiCheatFront/src/components/pages/blog/posts/News.json', JSON.stringify(updatesFile, null, 2))
-                  res.send('Ready.');
-  */
+                var data = "data:" + response.headers["content-type"] + ";base64," + new Buffer(body).toString('base64');
+
+                var post = {
+                    title: title,
+                    DateTime: date,
+                    Author: author,
+                    Description: description,
+                    AuthorImage: data,
+                    Images: image
+                }
+
+                db.insertOne(post, (err, result) => {
+                    if (err) {
+                        res.send("Error en posteo")
+                    } else {
+                        io.sockets.emit('broadcast', "newpost")
+                        res.send(result)
+                    }
+                })
+
+
             } else {
                 console.log(error)
                 res.send(error);

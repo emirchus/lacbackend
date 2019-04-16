@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>LAC Post</title>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,700,800');
+
+        * {
+            font-family: 'Roboto', 'Open Sans', 'Sans Serif';
+            font-weight: 400;
+            font-size: 18px;
+            color: #272727;
+            user-select: none;
+            -webkit-user-drag: none;
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        .background {
+            background: -moz-linear-gradient(top, #675f76 0%, #655d72 15%, #5a5667 34%, #5b5464 35%, #5b5466 36%, #353439 77%, #2f2f31 87%, #2c2c2e 97%, #2b2b2b 98%, #2b2b2d 100%);
+            background: -webkit-linear-gradient(top, #675f76 0%, #655d72 15%, #5a5667 34%, #5b5464 35%, #5b5466 36%, #353439 77%, #2f2f31 87%, #2c2c2e 97%, #2b2b2b 98%, #2b2b2d 100%);
+            background: linear-gradient(to bottom, #675f76 0%, #655d72 15%, #5a5667 34%, #5b5464 35%, #5b5466 36%, #353439 77%, #2f2f31 87%, #2c2c2e 97%, #2b2b2b 98%, #2b2b2d 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#675f76', endColorstr='#2b2b2d', GradientType=0);
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .content {
+            width: 40%;
+            height: 50%;
+            padding: 18px;
+            background: whitesmoke;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+            margin: auto;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-family: 'Open Sans';
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        h2 {
+            font-family: 'Roboto';
+            font-weight: 300;
+            text-transform: capitalize;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .content form {
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: #ddd;
+            border-radius: 15px;
+            padding: 10px;
+            margin: 5px auto 5px auto;
+            font-family: 'Roboto';
+            font-weight: 500;
+            color: #272727;
+            width: 70%;
+            text-align: center;
+        }
+
+        input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, .1), 0 3px 6px rgba(0, 0, 0, .08);
+        }
+
+        input[type="submit"] {
+            font-family: 'Segoe UI', 'Open Sans', 'Roboto', sans-serif;
+            width: 200px;
+            font-weight: 500;
+            background: #272727;
+            color: antiquewhite;
+            border: none;
+            outline: none;
+            font-size: 24px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            padding: .625rem 2rem;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+            cursor: pointer;
+            display: inline-block;
+            transition: all .22s;
+        }
+
+
+        input[type="submit"]:hover {
+
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, .1), 0 3px 6px rgba(0, 0, 0, .08);
+            filter: brightness(130%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background">
+        <div class="content">
+            <h1>LiteAntiCheat</h1>
+            <h2>Post to blog</h2>
+            <form id="formsend">
+
+                <input type="text" name="title" id="title" placeholder="Title">
+                <input type="text" name="author" id="author" placeholder="Author">
+                <input type="text" name="description" id="description" placeholder="Description">
+                <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg">
+                <input type="password" name="password" id="password" placeholder="Password">
+
+                <input type="submit" value="Send">
+
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('formsend').addEventListener('submit', (e) => {
+
+            e.preventDefault();
+            console.log("HOLA");
+
+
+            var title = document.getElementById('title').value;
+            var author = document.getElementById('author').value;
+            var descripcion = document.getElementById('description').value;
+            var image = document.getElementById('image').files[0];
+            var ps = document.getElementById('password').value;
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1;
+            var yyyy = today.getFullYear();
+
+
+            var fr = new FileReader();
+
+            fr.addEventListener('load', function (e) {
+                var post = {
+                    "author": author,
+                    "title": title,
+                    "date": date,
+                    "image": e.target.result,
+                    "description": descripcion,
+                    "password": ps
+                }
+
+
+                var monthNames = [
+                    "Jan", "Feb", "Mar",
+                    "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct",
+                    "Nov", "Dec"
+                ];
+
+                var date = dd + '-' + monthNames[mm] + '-' + yyyy
+                fetch("https://lacservices.herokuapp.com/updates/post", {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "author": author,
+                        "title": title,
+                        "date": date,
+                        "image": image,
+                        "description": descripcion,
+                        "password": ps
+                    })
+                }).then((res) => { return res.json() })
+                    .then(data => {
+                        console.log(data);
+                    })
+
+            });
+
+            fr.readAsDataURL(image)
+
+        })
+    </script>
+</body>
+
+</html>
