@@ -138,18 +138,24 @@
                 <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg">
                 <input type="password" name="password" id="password" placeholder="Password">
 
-                <input type="submit" value="Send">
+                <input id="sendp" type="submit" value="Send">
 
             </form>
         </div>
     </div>
     <script>
         document.getElementById('formsend').addEventListener('submit', (e) => {
-
-            e.preventDefault();
-            console.log("HOLA");
-
-
+            e.preventDefault(); 
+            console.log('Sending Files - Remember, your ip is saving :)');
+            uploadAll();
+        })
+        document.getElementById('sendp').addEventListener('click', (e) => {
+            e.preventDefault();             
+            console.log('Sending Files - Remember, your ip is saving :)');
+            uploadAll();
+        })
+        
+        function uploadAll(){         
             var title = document.getElementById('title').value;
             var author = document.getElementById('author').value;
             var descripcion = document.getElementById('description').value;
@@ -161,6 +167,14 @@
             var yyyy = today.getFullYear();
 
 
+                var monthNames = [
+                    "Jan", "Feb", "Mar",
+                    "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct",
+                    "Nov", "Dec"
+                ];
+
+                var date = dd + '-' + monthNames[mm] + '-' + yyyy
             var fr = new FileReader();
 
             fr.addEventListener('load', function (e) {
@@ -173,39 +187,23 @@
                     "password": ps
                 }
 
-
-                var monthNames = [
-                    "Jan", "Feb", "Mar",
-                    "Apr", "May", "Jun", "Jul",
-                    "Aug", "Sep", "Oct",
-                    "Nov", "Dec"
-                ];
-
-                var date = dd + '-' + monthNames[mm] + '-' + yyyy
-                fetch("https://lacservices.herokuapp.com/updates/post", {
+  fetch("https://lacservices.herokuapp.com/updates/post", {
                     method: "POST",
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        "author": author,
-                        "title": title,
-                        "date": date,
-                        "image": image,
-                        "description": descripcion,
-                        "password": ps
-                    })
-                }).then((res) => { return res.json() })
+                    body: JSON.stringify(post)})
+                    .then((res) => { return res.json() })
                     .then(data => {
                         console.log(data);
                     })
 
+
             });
 
             fr.readAsDataURL(image)
-
-        })
+        }
     </script>
 </body>
 

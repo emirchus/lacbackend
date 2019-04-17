@@ -38,11 +38,11 @@ var count = 0;
 
 io.on('connection', function (socket) {
     count++
-    io.sockets.emit('broadcast', count + " people online")
+    io.sockets.emit('broadcast', count + "-conection")
     console.log(count + " people online")
     socket.on('disconnect', function (e) {
         count--;
-        io.sockets.emit('broadcast', count + " people online")
+        io.sockets.emit('broadcast', count + "-disconected")
         console.log(count + " people online")
     });
     socket.on('friendinfo', (data) => {
@@ -58,6 +58,10 @@ io.on('connection', function (socket) {
             io.sockets.emit('ofriend', friendname)
         }
 
+    })
+
+    socket.on('message', (data) => {
+         io.sockets.emit('message', data)
     })
 
     socket.on('friendaction', data => {
@@ -395,7 +399,8 @@ app.post('/updates/post', (req, res) => {
                     Author: author,
                     Description: description,
                     AuthorImage: data,
-                    Images: image
+                    Images: image,
+                    ip: getClientIP(req, res).IP
                 }
 
                 db.insertOne(post, (err, result) => {
@@ -403,6 +408,8 @@ app.post('/updates/post', (req, res) => {
                         res.send("Error en posteo")
                     } else {
                         io.sockets.emit('broadcast', "newpost")
+                        console.log(getClientIP(req, res).IP);
+                        
                         res.send(result)
                     }
                 })
