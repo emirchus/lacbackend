@@ -407,7 +407,7 @@ app.post('/updates/post', (req, res) => {
                     if (err) {
                         res.send("Error en posteo")
                     } else {
-                        io.sockets.emit('broadcast', "newpost")
+                        io.sockets.emit('broadcast', JSON.stringify(post))
                         console.log(getClientIP(req, res).IP);
                         
                         res.send(result)
