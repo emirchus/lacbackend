@@ -131,7 +131,7 @@ io.on('connection', function (socket) {
                 else if (action === "accept") {
                     if (!user.friends.find(x => x === friendname)) {
                         if (!user.friendsends.find(x => x === friendname)) {
-                            if (!user.friendrequest.find(x => x === friendname)) {
+                            if (user.friendrequest.find(x => x === friendname)) {
                                 addFriend(from, friendname).then((sf, err) => {
                                     if (err) {
                                         io.sockets.emit('error', "Not found your-friend" + "-" + from)
