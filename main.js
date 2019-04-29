@@ -243,6 +243,7 @@ app.post('/signup', (req, res) => {
                             last_address: ip,
                             cape: "",
                             status: false,
+                            signupdate: Date.now(),
                             photourl: photuri
 
                         }, (err, result) => {
@@ -298,6 +299,7 @@ app.post('/signin', (req, res) => {
                             sessionid: token,
                             timestamp: Date.now(),
                             address: ip,
+                            signupdate: result.signupdate,
                             verified: result.verified
                         })
                         if (result.verified) {
@@ -615,6 +617,7 @@ app.post('/getuser', (req, res) => {
                 skin: result.skin,
                 cape: result.cape,
                 id: result._id,
+                signupdate: result.signupdate,
                 photourl: result.photourl
             }
             res.send(get);
@@ -643,7 +646,8 @@ function getUser(name) {
                         friendsends: result.friendsend,
                         skin: result.skin,
                         cape: result.cape,
-                        id: result._id
+                        id: result._id,
+                        signupdate: result.signupdate
                     }
                     resolve(user);
                 } else {
