@@ -59,9 +59,20 @@ io.on('connection', function (socket) {
         }
 
     })
+    
+    socket.on('request', (data) => {
+        
+    })
 
     socket.on('message', (data) => {
          io.sockets.emit('message', data)
+    })
+
+    socket.on('request', (data) => {
+        data = JSON.parse(data)        
+        getUser(data.username).then((user) => {
+            io.sockets.emit('capereq', JSON.stringify(user.capes));
+        })
     })
 
     socket.on('friendaction', data => {
@@ -241,7 +252,8 @@ app.post('/signup', (req, res) => {
                             punishments: [],
                             last_login: "",
                             last_address: ip,
-                            cape: "",
+                            capes: [],
+                            customcape: "",   
                             status: false,
                             signupdate: Date.now(),
                             photourl: photuri
@@ -295,6 +307,7 @@ app.post('/signin', (req, res) => {
                             id: result._id,
                             uuid: result.verifiedToken,
                             username: result.username,
+                            capes: result.capes,
                             photo: result.photourl,
                             sessionid: token,
                             timestamp: Date.now(),
@@ -615,7 +628,7 @@ app.post('/getuser', (req, res) => {
                 friendrequest: result.friendres,
                 friendsends: result.friendsend,
                 skin: result.skin,
-                cape: result.cape,
+                capes: result.capes,
                 id: result._id,
                 signupdate: result.signupdate,
                 photourl: result.photourl
@@ -645,7 +658,7 @@ function getUser(name) {
                         friendrequest: result.friendres,
                         friendsends: result.friendsend,
                         skin: result.skin,
-                        cape: result.cape,
+                        capes: result.capes,
                         id: result._id,
                         signupdate: result.signupdate
                     }
