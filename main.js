@@ -72,6 +72,10 @@ io.on('connection', function (socket) {
         data = JSON.parse(data)        
         getUser(data.username).then((user) => {
             io.sockets.emit('capereq', JSON.stringify(user.capes));
+        }, () => {
+            console.log("error")
+        }).catch(() => {
+            console.log("error")
         })
     })
 
