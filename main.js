@@ -59,9 +59,24 @@ io.on('connection', function (socket) {
         }
 
     })
+    
+    socket.on('request', (data) => {
+        
+    })
 
     socket.on('message', (data) => {
          io.sockets.emit('message', data)
+    })
+
+    socket.on('request', (data) => {
+        data = JSON.parse(data)        
+        getUser(data.username).then((user) => {
+            io.sockets.emit('capereq', JSON.stringify({capes: user.capes}));
+        }, () => {
+            console.log("error")
+        }).catch(() => {
+            console.log("error")
+        })
     })
 
     socket.on('friendaction', data => {
@@ -131,7 +146,7 @@ io.on('connection', function (socket) {
                 else if (action === "accept") {
                     if (!user.friends.find(x => x === friendname)) {
                         if (!user.friendsends.find(x => x === friendname)) {
-                            if (!user.friendrequest.find(x => x === friendname)) {
+                            if (user.friendrequest.find(x => x === friendname)) {
                                 addFriend(from, friendname).then((sf, err) => {
                                     if (err) {
                                         io.sockets.emit('error', "Not found your-friend" + "-" + from)
@@ -241,8 +256,10 @@ app.post('/signup', (req, res) => {
                             punishments: [],
                             last_login: "",
                             last_address: ip,
-                            cape: "",
+                            capes: [],
+                            customcape: "",   
                             status: false,
+                            signupdate: Date.now(),
                             photourl: photuri
 
                         }, (err, result) => {
@@ -294,10 +311,12 @@ app.post('/signin', (req, res) => {
                             id: result._id,
                             uuid: result.verifiedToken,
                             username: result.username,
+                            capes: result.capes,
                             photo: result.photourl,
                             sessionid: token,
                             timestamp: Date.now(),
                             address: ip,
+                            signupdate: result.signupdate,
                             verified: result.verified
                         })
                         if (result.verified) {
@@ -613,8 +632,9 @@ app.post('/getuser', (req, res) => {
                 friendrequest: result.friendres,
                 friendsends: result.friendsend,
                 skin: result.skin,
-                cape: result.cape,
+                capes: result.capes,
                 id: result._id,
+                signupdate: result.signupdate,
                 photourl: result.photourl
             }
             res.send(get);
@@ -642,8 +662,9 @@ function getUser(name) {
                         friendrequest: result.friendres,
                         friendsends: result.friendsend,
                         skin: result.skin,
-                        cape: result.cape,
-                        id: result._id
+                        capes: result.capes,
+                        id: result._id,
+                        signupdate: result.signupdate
                     }
                     resolve(user);
                 } else {
