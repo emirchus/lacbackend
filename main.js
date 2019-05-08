@@ -289,7 +289,7 @@ app.post('/signin', (req, res) => {
                 var ress = bcrypt.compareSync(password, result.password);
                 if (ress === true) {
                     var ip = getClientIP(req, res).IP;
-                    const exists = accountsTokens.find(a => a.ip === ip);
+                    const exists = accountsTokens.find(a => a.address === ip);
                     if (exists) {
                         if (result.verified) {
                             res.send({
