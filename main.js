@@ -279,11 +279,17 @@ app.post('/signup', (req, res) => {
     }
 })
 
+function validateEmail(email) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
 app.post('/signin', (req, res) => {
     let email = req.body.email;
     var password = req.body.password;
     const usersCollections = lacdb.collection('clients');
     if (email && password) {
+      if(validateEmail(email)){
         usersCollections.findOne({ 'email': email }, (err, result) => {
             if (result) {
                 var ress = bcrypt.compareSync(password, result.password);
@@ -350,6 +356,74 @@ app.post('/signin', (req, res) => {
                 res.send(dd);
             }
         })
+      }else{
+        usersCollections.findOne({ 'usernamelower': email.toLowerCase() }, (err, result) => {
+            if (result) {
+                var ress = bcrypt.compareSync(password, result.password);
+                if (ress === true) {
+                    var ip = getClientIP(req, res).IP;
+                    const exists = accountsTokens.find(a => a.address === ip);
+                    if (exists) {
+                        if (result.verified) {
+                            res.send({
+                                sessionid: exists.sessionid,
+                            });
+                        } else {
+                            res.send({
+                                sessionid: exists.sessionid,
+                                data: "need verifier"
+                            });
+                        }
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                    } else {
+                        var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
+                        accountsTokens.push({
+                            email: email,
+                            id: result._id,
+                            uuid: result.verifiedToken,
+                            username: result.username,
+                            capes: result.capes,
+                            photo: result.photourl,
+                            sessionid: token,
+                            timestamp: Date.now(),
+                            address: ip,
+                            signupdate: result.signupdate,
+                            verified: result.verified
+                        })
+                        if (result.verified) {
+                            res.send({
+                                sessionid: token,
+                            });
+                        } else {
+                            res.send({
+                                sessionid: token,
+                                data: 'need verifier ' + result.verifiedToken
+                            });
+                        }
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                    }
+                } else {
+                    var dd = new Error('Wrong password.')
+                    dd.status = 402;
+                    res.send(dd);
+                }
+            } else {
+                if (err) {
+                    var dd = new Error('User does exists.')
+                    dd.status = 405;
+                    res.send(dd);
+                }
+                var dd = new Error('User does exists.')
+                dd.status = 405;
+                dd.message = "User does exists";
+                res.send(dd);
+            }
+        })
+      }
     }
 
 })
