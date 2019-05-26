@@ -58,7 +58,7 @@ io.on('connection', function (socket) {
             usersCollections.updateOne({ "usernamelower": friendname }, { $set: { "status": false } })
             io.sockets.emit('ofriend', friendname)
             if (serverlog) {
-                const usr = accountsTokens.find(a => a.username.toLowercase() === friendname);
+                const usr = accountsTokens.find(a => a.username.toLowerCase() === friendname);
                 accountsTokens.splice(accountsTokens.indexOf(usr), 1);
             }
         }
