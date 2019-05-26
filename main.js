@@ -289,7 +289,7 @@ app.post('/signin', (req, res) => {
     var password = req.body.password;
     const usersCollections = lacdb.collection('clients');
     if (email && password) {
-      if(validateEmail(email)){
+      if(validateEmail(email)){          
         usersCollections.findOne({ 'email': email }, (err, result) => {
             if (result) {
                 var ress = bcrypt.compareSync(password, result.password);
@@ -307,13 +307,11 @@ app.post('/signin', (req, res) => {
                                 data: "need verifier"
                             });
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     } else {
                         var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
                         accountsTokens.push({
-                            email: email,
+                            email: result.email,
                             id: result._id,
                             uuid: result.verifiedToken,
                             username: result.username,
@@ -335,9 +333,7 @@ app.post('/signin', (req, res) => {
                                 data: 'need verifier ' + result.verifiedToken
                             });
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                        usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     }
                 } else {
                     var dd = new Error('Wrong password.')
@@ -374,9 +370,7 @@ app.post('/signin', (req, res) => {
                                 data: "need verifier"
                             });
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     } else {
                         var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
                         accountsTokens.push({
@@ -402,9 +396,7 @@ app.post('/signin', (req, res) => {
                                 data: 'need verifier ' + result.verifiedToken
                             });
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now() } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_address": ip } })
-                        usersCollections.updateOne({ "email": email }, { $set: { "status": true } })
+                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     }
                 } else {
                     var dd = new Error('Wrong password.')
