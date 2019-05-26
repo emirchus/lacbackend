@@ -49,6 +49,7 @@ io.on('connection', function (socket) {
         console.log(data);
         var status = data.split('-')[0];
         var friendname = data.split('-')[1];
+        var serverlog = data.split('-')[1];
         const usersCollections = lacdb.collection('clients');
         if (status === "online") {
             usersCollections.updateOne({ "usernamelower": friendname }, { $set: { "status": true } })
@@ -56,24 +57,26 @@ io.on('connection', function (socket) {
         } else {
             usersCollections.updateOne({ "usernamelower": friendname }, { $set: { "status": false } })
             io.sockets.emit('ofriend', friendname)
-            const usr = accountsTokens.find(a => a.username.toLowercase() === friendname);
-            accountsTokens.splice(accountsTokens.indexOf(usr), 1);
+            if (serverlog) {
+                const usr = accountsTokens.find(a => a.username.toLowercase() === friendname);
+                accountsTokens.splice(accountsTokens.indexOf(usr), 1);
+            }
         }
 
     })
-    
+
     socket.on('request', (data) => {
-        
+
     })
 
     socket.on('message', (data) => {
-         io.sockets.emit('message', data)
+        io.sockets.emit('message', data)
     })
 
     socket.on('request', (data) => {
-        data = JSON.parse(data)        
+        data = JSON.parse(data)
         getUser(data.username).then((user) => {
-            io.sockets.emit('capereq', JSON.stringify({capes: user.capes}));
+            io.sockets.emit('capereq', JSON.stringify({ capes: user.capes }));
         }, () => {
             console.log("error")
         }).catch(() => {
@@ -222,7 +225,7 @@ app.get('/', (req, res) => {
 app.get('/post', (req, res) => {
     res.set('Content-Type', 'text/html');
     if (lacdb) {
-        res.sendFile(path.join(__dirname+"/index.html"));
+        res.sendFile(path.join(__dirname + "/index.html"));
     }
 })
 
@@ -231,7 +234,7 @@ app.post('/signup', (req, res) => {
     var password = req.body.password;
     var username = req.body.username;
     var photuri = req.body.photopic;
-    var usernamelower =  username.toLowerCase();
+    var usernamelower = username.toLowerCase();
     const usersCollections = lacdb.collection('clients');
     var ip = getClientIP(req, res).IP;
     var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
@@ -239,11 +242,11 @@ app.post('/signup', (req, res) => {
         usersCollections.findOne({ 'usernamelower': usernamelower }, (err, user) => {
             if (!user) {
                 usersCollections.findOne({ 'email': email }, (errt, result) => {
-                    if (errt) {    
+                    if (errt) {
                         res.send({ "error": errt })
                     }
-                    if(!result){
-                           usersCollections.insertOne({
+                    if (!result) {
+                        usersCollections.insertOne({
                             username: username,
                             usernamelower: usernamelower,
                             email: req.body.email,
@@ -259,7 +262,7 @@ app.post('/signup', (req, res) => {
                             last_login: "",
                             last_address: ip,
                             capes: [],
-                            customcape: "",   
+                            customcape: "",
                             status: false,
                             signupdate: Date.now(),
                             photourl: photuri
@@ -267,10 +270,10 @@ app.post('/signup', (req, res) => {
                         }, (err, result) => {
                             res.send(result);
                         })
-                    }else{
-                         res.send({ "error": "account already exists" })
+                    } else {
+                        res.send({ "error": "account already exists" })
                     }
-                    
+
                 })
             } else {
                 res.send({ "error": "username already exists" })
@@ -291,133 +294,133 @@ app.post('/signin', (req, res) => {
     var password = req.body.password;
     const usersCollections = lacdb.collection('clients');
     if (email && password) {
-      if(validateEmail(email)){          
-        usersCollections.findOne({ 'email': email }, (err, result) => {
-            if (result) {
-                var ress = bcrypt.compareSync(password, result.password);
-                if (ress === true) {
-                    var ip = getClientIP(req, res).IP;
-                    const exists = accountsTokens.find(a => a.address === ip);
-                    if (exists) {
-                        if (result.verified) {
-                            res.send({
-                                sessionid: exists.sessionid,
-                            });
+        if (validateEmail(email)) {
+            usersCollections.findOne({ 'email': email }, (err, result) => {
+                if (result) {
+                    var ress = bcrypt.compareSync(password, result.password);
+                    if (ress === true) {
+                        var ip = getClientIP(req, res).IP;
+                        const exists = accountsTokens.find(a => a.address === ip);
+                        if (exists) {
+                            if (result.verified) {
+                                res.send({
+                                    sessionid: exists.sessionid,
+                                });
+                            } else {
+                                res.send({
+                                    sessionid: exists.sessionid,
+                                    data: "need verifier"
+                                });
+                            }
+                            usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
                         } else {
-                            res.send({
-                                sessionid: exists.sessionid,
-                                data: "need verifier"
-                            });
+                            var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
+                            accountsTokens.push({
+                                email: result.email,
+                                id: result._id,
+                                uuid: result.verifiedToken,
+                                username: result.username,
+                                capes: result.capes,
+                                photo: result.photourl,
+                                sessionid: token,
+                                timestamp: Date.now(),
+                                address: ip,
+                                signupdate: result.signupdate,
+                                verified: result.verified
+                            })
+                            if (result.verified) {
+                                res.send({
+                                    sessionid: token,
+                                });
+                            } else {
+                                res.send({
+                                    sessionid: token,
+                                    data: 'need verifier ' + result.verifiedToken
+                                });
+                            }
+                            usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     } else {
-                        var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
-                        accountsTokens.push({
-                            email: result.email,
-                            id: result._id,
-                            uuid: result.verifiedToken,
-                            username: result.username,
-                            capes: result.capes,
-                            photo: result.photourl,
-                            sessionid: token,
-                            timestamp: Date.now(),
-                            address: ip,
-                            signupdate: result.signupdate,
-                            verified: result.verified
-                        })
-                        if (result.verified) {
-                            res.send({
-                                sessionid: token,
-                            });
-                        } else {
-                            res.send({
-                                sessionid: token,
-                                data: 'need verifier ' + result.verifiedToken
-                            });
-                        }
-                        usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
+                        var dd = new Error('Wrong password.')
+                        dd.status = 402;
+                        res.send(dd);
                     }
                 } else {
-                    var dd = new Error('Wrong password.')
-                    dd.status = 402;
-                    res.send(dd);
-                }
-            } else {
-                if (err) {
+                    if (err) {
+                        var dd = new Error('User does exists.')
+                        dd.status = 405;
+                        res.send(dd);
+                    }
                     var dd = new Error('User does exists.')
                     dd.status = 405;
+                    dd.message = "User does exists";
                     res.send(dd);
                 }
-                var dd = new Error('User does exists.')
-                dd.status = 405;
-                dd.message = "User does exists";
-                res.send(dd);
-            }
-        })
-      }else{
-        usersCollections.findOne({ 'usernamelower': email.toLowerCase() }, (err, result) => {
-            if (result) {
-                var ress = bcrypt.compareSync(password, result.password);
-                if (ress === true) {
-                    var ip = getClientIP(req, res).IP;
-                    const exists = accountsTokens.find(a => a.address === ip);
-                    if (exists) {
-                        if (result.verified) {
-                            res.send({
-                                sessionid: exists.sessionid,
-                            });
+            })
+        } else {
+            usersCollections.findOne({ 'usernamelower': email.toLowerCase() }, (err, result) => {
+                if (result) {
+                    var ress = bcrypt.compareSync(password, result.password);
+                    if (ress === true) {
+                        var ip = getClientIP(req, res).IP;
+                        const exists = accountsTokens.find(a => a.address === ip);
+                        if (exists) {
+                            if (result.verified) {
+                                res.send({
+                                    sessionid: exists.sessionid,
+                                });
+                            } else {
+                                res.send({
+                                    sessionid: exists.sessionid,
+                                    data: "need verifier"
+                                });
+                            }
+                            usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
                         } else {
-                            res.send({
-                                sessionid: exists.sessionid,
-                                data: "need verifier"
-                            });
+                            var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
+                            accountsTokens.push({
+                                email: result.email,
+                                id: result._id,
+                                uuid: result.verifiedToken,
+                                username: result.username,
+                                capes: result.capes,
+                                photo: result.photourl,
+                                sessionid: token,
+                                timestamp: Date.now(),
+                                address: ip,
+                                signupdate: result.signupdate,
+                                verified: result.verified
+                            })
+                            if (result.verified) {
+                                res.send({
+                                    sessionid: token,
+                                });
+                            } else {
+                                res.send({
+                                    sessionid: token,
+                                    data: 'need verifier ' + result.verifiedToken
+                                });
+                            }
+                            usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     } else {
-                        var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
-                        accountsTokens.push({
-                            email: result.email,
-                            id: result._id,
-                            uuid: result.verifiedToken,
-                            username: result.username,
-                            capes: result.capes,
-                            photo: result.photourl,
-                            sessionid: token,
-                            timestamp: Date.now(),
-                            address: ip,
-                            signupdate: result.signupdate,
-                            verified: result.verified
-                        })
-                        if (result.verified) {
-                            res.send({
-                                sessionid: token,
-                            });
-                        } else {
-                            res.send({
-                                sessionid: token,
-                                data: 'need verifier ' + result.verifiedToken
-                            });
-                        }
-                        usersCollections.updateOne({ "email":  result.email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
+                        var dd = new Error('Wrong password.')
+                        dd.status = 402;
+                        res.send(dd);
                     }
                 } else {
-                    var dd = new Error('Wrong password.')
-                    dd.status = 402;
-                    res.send(dd);
-                }
-            } else {
-                if (err) {
+                    if (err) {
+                        var dd = new Error('User does exists.')
+                        dd.status = 405;
+                        res.send(dd);
+                    }
                     var dd = new Error('User does exists.')
                     dd.status = 405;
+                    dd.message = "User does exists";
                     res.send(dd);
                 }
-                var dd = new Error('User does exists.')
-                dd.status = 405;
-                dd.message = "User does exists";
-                res.send(dd);
-            }
-        })
-      }
+            })
+        }
     }
 
 })
@@ -458,7 +461,7 @@ app.post('/authenticate', (req, res) => {
 app.post('/updates/get', (req, res) => {
     const db = lacdb.collection('posts');
     db.find({}).toArray((err, docs) => {
-        if(err){
+        if (err) {
             res.send("error on find posts")
         }
         res.send(docs)
@@ -496,7 +499,7 @@ app.post('/updates/post', (req, res) => {
                     } else {
                         io.sockets.emit('updateblog', JSON.stringify(post))
                         console.log(getClientIP(req, res).IP);
-                        
+
                         res.send(result)
                     }
                 })
