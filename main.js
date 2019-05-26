@@ -56,6 +56,8 @@ io.on('connection', function (socket) {
         } else {
             usersCollections.updateOne({ "usernamelower": friendname }, { $set: { "status": false } })
             io.sockets.emit('ofriend', friendname)
+            const usr = accountsTokens.find(a => a.username.toLowercase() === friendname);
+            accountsTokens.splice(accountsTokens.indexOf(usr), 1);
         }
 
     })
@@ -374,7 +376,7 @@ app.post('/signin', (req, res) => {
                     } else {
                         var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
                         accountsTokens.push({
-                            email: email,
+                            email: result.email,
                             id: result._id,
                             uuid: result.verifiedToken,
                             username: result.username,
@@ -396,7 +398,7 @@ app.post('/signin', (req, res) => {
                                 data: 'need verifier ' + result.verifiedToken
                             });
                         }
-                        usersCollections.updateOne({ "email": email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
+                        usersCollections.updateOne({ "email":  result.email }, { $set: { "last_login": Date.now(), "last_address": ip ,  "status": true  } })
                     }
                 } else {
                     var dd = new Error('Wrong password.')
