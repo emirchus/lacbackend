@@ -69,16 +69,15 @@ io.on('connection', function (socket) {
         const obj = JSON.parse(data);
         oauth(obj.id, obj.password).then((token) => {
             if(token){                
-                const userco = accountsTokens.find(a => a.sessionid === token);
                 let ss = {
                     userid: obj.accessToken,
-                    success: JSON.stringify(userco)
+                    success: token
                 }
                 io.sockets.emit('oauthsuccess', ss)
             }else{
                 let err = {
                     userid: obj.accessToken,
-                    error: "Wrong error"
+                    error: "wrong error"
                 }
                 io.sockets.emit('oautherror', err)
             }
@@ -86,21 +85,21 @@ io.on('connection', function (socket) {
             if (error == 1) {
                 let err = {
                     userid: obj.accessToken,
-                    error: "Wrong Password"
+                    error: "wrong Password"
                 }
                 io.sockets.emit('oautherror', err)
             }
             else if (error == 2) {
                 let err = {
                     userid: obj.accessToken,
-                    error: "User does exists"
+                    error: "user does exists"
                 }
                 io.sockets.emit('oautherror', err)
             }
             else if (error == 3) {
                 let err = {
                     userid: obj.accessToken,
-                    error: "Invalid arguments"
+                    error: "invalid arguments"
                 }
                 io.sockets.emit('oautherror', err)
             }
