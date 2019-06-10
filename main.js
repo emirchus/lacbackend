@@ -748,6 +748,88 @@ function getUser(name) {
     })
 }
 
+function oauth(email, password) {
+    const usersCollections = lacdb.collection('clients');
+    return new Promise((resolve, reject) => {
+        if (email && password) {
+            if (validateEmail(email)) {
+                usersCollections.findOne({ 'email': email }, (err, result) => {
+                    if (result) {
+                        var ress = bcrypt.compareSync(password, result.password);
+                        if (ress === true) {
+                            var ip = getClientIP(req, res).IP;
+                            const exists = accountsTokens.find(a => a.email === result.email);
+                            if (exists) {
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                resolve(exists.sessionid)
+                            } else {
+                                var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
+                                accountsTokens.push({
+                                    email: result.email,
+                                    id: result._id,
+                                    uuid: result.verifiedToken,
+                                    username: result.username,
+                                    capes: result.capes,
+                                    photo: result.photourl,
+                                    sessionid: token,
+                                    timestamp: Date.now(),
+                                    address: ip,
+                                    signupdate: result.signupdate,
+                                    verified: result.verified
+                                })
+                                if (result.verified) {
+                                    usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                    resolve(token)
+                                }
+                            }
+                        } else {
+                            reject(1)
+                        }
+                    } else {
+                        reject(2)
+                    }
+                })
+            } else {
+                usersCollections.findOne({ 'usernamelower': email.toLowerCase() }, (err, result) => {
+                    if (result) {
+                        var ress = bcrypt.compareSync(password, result.password);
+                        if (ress === true) {
+                            var ip = getClientIP(req, res).IP;
+                            const exists = accountsTokens.find(a => a.email === result.email);
+                            if (exists) {
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                resolve(exists.sessionid)
+                            } else {
+                                var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
+                                accountsTokens.push({
+                                    email: result.email,
+                                    id: result._id,
+                                    uuid: result.verifiedToken,
+                                    username: result.username,
+                                    capes: result.capes,
+                                    photo: result.photourl,
+                                    sessionid: token,
+                                    timestamp: Date.now(),
+                                    address: ip,
+                                    signupdate: result.signupdate,
+                                    verified: result.verified
+                                })
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                resolve(token)
+                            }
+                        } else {
+                            reject(1)
+                        }
+                    } else {
+                        reject(2)
+                    }
+                })
+            }
+        }
+    })
+
+}
+
 function addFriend(user, friend) {
     const usersCollections = lacdb.collection('clients');
     return new Promise((resolve, reject) => {
