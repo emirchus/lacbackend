@@ -67,6 +67,8 @@ io.on('connection', function (socket) {
 
     socket.on('oauth', (data) => {
         const obj = JSON.parse(data);
+        console.log(data)
+        console.log(obj)
         oauth(obj.id, obj.password).then((token) => {
             if(token){                
                 let ss = {
