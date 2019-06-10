@@ -67,7 +67,7 @@ io.on('connection', function (socket) {
 
     socket.on('oauth', (data) => {
         const obj = JSON.parse(data);
-        console.log(data)
+        console.log(dat)
         console.log(obj)
         oauth(obj.id, obj.password).then((token) => {
             if(token){                
@@ -344,7 +344,7 @@ app.post('/signin', (req, res) => {
                     var ress = bcrypt.compareSync(password, result.password);
                     if (ress === true) {
                         var ip = getClientIP(req, res).IP;
-                        const exists = accountsTokens.find(a => a.address === ip);
+                        const exists = accountsTokens.find(a => a.email === result.email);
                         if (exists) {
                             if (result.verified) {
                                 res.send({
@@ -368,7 +368,6 @@ app.post('/signin', (req, res) => {
                                 photo: result.photourl,
                                 sessionid: token,
                                 timestamp: Date.now(),
-                                address: ip,
                                 signupdate: result.signupdate,
                                 verified: result.verified
                             })
@@ -407,7 +406,7 @@ app.post('/signin', (req, res) => {
                     var ress = bcrypt.compareSync(password, result.password);
                     if (ress === true) {
                         var ip = getClientIP(req, res).IP;
-                        const exists = accountsTokens.find(a => a.address === ip);
+                        const exists = accountsTokens.find(a => a.email === result.email);
                         if (exists) {
                             if (result.verified) {
                                 res.send({
@@ -431,7 +430,6 @@ app.post('/signin', (req, res) => {
                                 photo: result.photourl,
                                 sessionid: token,
                                 timestamp: Date.now(),
-                                address: ip,
                                 signupdate: result.signupdate,
                                 verified: result.verified
                             })
@@ -801,10 +799,9 @@ function oauth(email, password) {
                     if (result) {
                         var ress = bcrypt.compareSync(password, result.password);
                         if (ress === true) {
-                            var ip = getClientIP(req, res).IP;
                             const exists = accountsTokens.find(a => a.email === result.email);
                             if (exists) {
-                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
                                 resolve(exists.sessionid)
                             } else {
                                 var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
@@ -817,12 +814,11 @@ function oauth(email, password) {
                                     photo: result.photourl,
                                     sessionid: token,
                                     timestamp: Date.now(),
-                                    address: ip,
                                     signupdate: result.signupdate,
                                     verified: result.verified
                                 })
                                 if (result.verified) {
-                                    usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                    usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
                                     resolve(token)
                                 }
                             }
@@ -838,10 +834,9 @@ function oauth(email, password) {
                     if (result) {
                         var ress = bcrypt.compareSync(password, result.password);
                         if (ress === true) {
-                            var ip = getClientIP(req, res).IP;
                             const exists = accountsTokens.find(a => a.email === result.email);
                             if (exists) {
-                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
                                 resolve(exists.sessionid)
                             } else {
                                 var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
@@ -854,11 +849,10 @@ function oauth(email, password) {
                                     photo: result.photourl,
                                     sessionid: token,
                                     timestamp: Date.now(),
-                                    address: ip,
                                     signupdate: result.signupdate,
                                     verified: result.verified
                                 })
-                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "last_address": ip, "status": true } })
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(),"status": true } })
                                 resolve(token)
                             }
                         } else {
