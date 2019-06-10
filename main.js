@@ -65,6 +65,49 @@ io.on('connection', function (socket) {
 
     })
 
+    socket.on('oauth', (data) => {
+        const obj = JSON.parse(data);
+        oauth(obj.id, obj.password).then((token) => {
+            if(token){                
+                const userco = accountsTokens.find(a => a.sessionid === token);
+                let ss = {
+                    userid: obj.accessToken,
+                    success: JSON.stringify(userco)
+                }
+                io.sockets.emit('oauthsuccess', ss)
+            }else{
+                let err = {
+                    userid: obj.accessToken,
+                    error: "Wrong error"
+                }
+                io.sockets.emit('oautherror', err)
+            }
+        }, (error) => {
+            if (error == 1) {
+                let err = {
+                    userid: obj.accessToken,
+                    error: "Wrong Password"
+                }
+                io.sockets.emit('oautherror', err)
+            }
+            else if (error == 2) {
+                let err = {
+                    userid: obj.accessToken,
+                    error: "User does exists"
+                }
+                io.sockets.emit('oautherror', err)
+            }
+            else if (error == 3) {
+                let err = {
+                    userid: obj.accessToken,
+                    error: "Invalid arguments"
+                }
+                io.sockets.emit('oautherror', err)
+            }
+        })
+
+    })
+
     socket.on('request', (data) => {
 
     })
@@ -825,6 +868,8 @@ function oauth(email, password) {
                     }
                 })
             }
+        } else {
+            reject(3)
         }
     })
 
