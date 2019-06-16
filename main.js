@@ -31,6 +31,18 @@ app.use(morgan('dev'));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
+const Email = require('./email');
+
+const OEmail = new Email({
+    "host": "in-v3.mailjet.com",
+    "port": "587",
+    "secure": true,
+    "auth": {
+        "type": "login",
+        "user": "d88e3842becfb3a92362a6a66bc45f64",
+        "password": "03c642f460b7531a450efb88430555ed"
+    }
+})
 //Middlewares
 
 var count = 0;
@@ -70,13 +82,13 @@ io.on('connection', function (socket) {
         console.log(data)
         console.log(obj)
         oauth(obj.id, obj.password).then((token) => {
-            if(token){                
+            if (token) {
                 let ss = {
                     userid: obj.accessToken,
                     success: token
                 }
                 io.sockets.emit('oauthsuccess', ss)
-            }else{
+            } else {
                 let err = {
                     userid: obj.accessToken,
                     error: "wrong error"
@@ -312,6 +324,21 @@ app.post('/signup', (req, res) => {
                             photourl: photuri
 
                         }, (err, result) => {
+                            let esmail = {
+                                from: "support@litenticheat.com",
+                                to: email,
+                                subject: "Verify account",
+                                html: `
+                                    <div>
+
+                                    <p>Correo ${email}</p>
+                                    <p>Nombre ${username}</p>
+                                    <a href="https://liteanticheat.com/verify/${token}">VERIFY</a>
+                                    </div>
+
+                                `
+                            }
+                            OEmail.sendMail(email)
                             res.send(result);
                         })
                     } else {
@@ -852,7 +879,7 @@ function oauth(email, password) {
                                     signupdate: result.signupdate,
                                     verified: result.verified
                                 })
-                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(),"status": true } })
+                                usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
                                 resolve(token)
                             }
                         } else {
