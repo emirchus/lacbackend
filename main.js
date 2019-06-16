@@ -22,7 +22,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.set('port', 3001);
+app.set('port', process.env.PORT | 3001);
 app.use(cors({
     allowedHeaders: 'Content-Type, Cache-Control, application/json'
 }));
