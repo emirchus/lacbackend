@@ -338,7 +338,7 @@ app.post('/signup', (req, res) => {
 
                                 `
                             }
-                            OEmail.sendMail(email)
+                            OEmail.sendMail(esmail)
                             res.send(result);
                         })
                     } else {
