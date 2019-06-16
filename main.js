@@ -22,7 +22,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', 3001);
 app.use(cors({
     allowedHeaders: 'Content-Type, Cache-Control, application/json'
 }));
@@ -31,18 +31,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-const Email = require('./email');
-
-const OEmail = new Email({
-    "host": "in-v3.mailjet.com",
-    "port": "587",
-    "secure": true,
-    "auth": {
-        "type": "login",
-        "user": "d88e3842becfb3a92362a6a66bc45f64",
-        "password": "03c642f460b7531a450efb88430555ed"
-    }
-})
+const mailjet = require('node-mailjet')
+    .connect('d88e3842becfb3a92362a6a66bc45f64', '03c642f460b7531a450efb88430555ed')
 //Middlewares
 
 var count = 0;
@@ -324,21 +314,40 @@ app.post('/signup', (req, res) => {
                             photourl: photuri
 
                         }, (err, result) => {
-                            let esmail = {
-                                from: "support@litenticheat.com",
-                                to: email,
-                                subject: "Verify account",
-                                html: `
-                                    <div>
+                            var sendEmail = mailjet.post("send", { 'version': 'v3.1' })
 
-                                    <p>Correo ${email}</p>
-                                    <p>Nombre ${username}</p>
-                                    <a href="https://liteanticheat.com/verify/${token}">VERIFY</a>
-                                    </div>
-
-                                `
+                            var Emails = {
+                                "Messages": [
+                                    {
+                                        "From": {
+                                            "Email": "support@liteanticheat.com",
+                                            "Name": "LiteAntiCheat"
+                                        },
+                                        "To": [
+                                            {
+                                                "Email": email,
+                                                "Name": username
+                                            }
+                                        ],
+                                        "TemplateID": 875856,
+                                        "TemplateLanguage": true,
+                                        "Subject": "Verify account",
+                                        "Variables": {
+                                            "username": username,
+                                            "accesstoken": token
+                                        }
+                                    }
+                                ]
                             }
-                            OEmail.sendMail(email)
+
+                            sendEmail.request(Emails).then((handlePostResponse) => {
+                                console.log("Mail sent to " + email);
+                                console.log(handlePostResponse.body);
+
+                            }).catch((handleError) => {
+                                console.log(handleError)
+                            });
+
                             res.send(result);
                         })
                     } else {
@@ -504,7 +513,7 @@ app.post('/verifiedaccount', (req, res) => {
                 if (result.verified) {
                     res.send({ "result": 'is already verified' })
                 } else {
-                    db.updateOne({ 'verifiedToken': token }, { $set: { verified: true } }, (err, ress) => {
+                    db.updateOne({ 'verifiedToken': token }, { $set: { 'verified': true } }, (err, ress) => {
                         res.send({ "result": "verified" })
                     })
                 }
