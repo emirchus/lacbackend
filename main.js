@@ -282,6 +282,7 @@ app.post('/signup', (req, res) => {
     var usernamelower = username.toLowerCase();
     const usersCollections = lacdb.collection('clients');
     var ip = getClientIP(req, res).IP;
+    haveThreeAccount(ip)
     var token = (Math.random().toString(36).substr(2)) + (Math.random().toString(36).substr(2));
     if (email && password && username) {
         usersCollections.findOne({ 'usernamelower': usernamelower }, (err, user) => {
@@ -309,6 +310,7 @@ app.post('/signup', (req, res) => {
                             capes: [],
                             customcape: "",
                             status: false,
+                            betatester: 0,
                             signupdate: Date.now(),
                             photourl: photuri
 
@@ -328,12 +330,12 @@ app.post('/signup', (req, res) => {
                                                 "Name": username
                                             }
                                         ],
-                                        "TemplateID": 875856,
+                                        "TemplateID": 876149,
                                         "TemplateLanguage": true,
                                         "Subject": "Verify account",
                                         "Variables": {
                                             "username": username,
-                                            "accesstoken": token
+                                            "confirmation_link": "https://liteanticheat.com/verify/" + token
                                         }
                                     }
                                 ]
@@ -538,8 +540,57 @@ app.post('/discord', (req, res) => {
     }
 })
 
+app.post('/betatester/add', (req, res) => {
+    var user = req.body.username;
+    var emailss = req.body.email;
+    var discord = req.body.discordname;
+    var discordtag = req.body.discordtag
+    if (user && discord && discordtag && emailss) {
+        usersCollections.findOne({ 'usernamelower': usernamelower }, (err, result) => {
+            if (betatester == 0) {
+                usersCollections.updateOne({ "email": result.email }, { $set: { "betatester": 1 } })
+                var sendEmail = mailjet.post("send", { 'version': 'v3.1' })
 
-app.post('/verifiedaccount', (req, res) => {
+                var Emails = {
+                    "Messages": [
+                        {
+                            "From": {
+                                "Email": "support@liteanticheat.com",
+                                "Name": "LiteAntiCheat"
+                            },
+                            "To": [
+                                {
+                                    "Email": emailss,
+                                    "Name": user
+                                }
+                            ],
+                            "TemplateID": 876183,
+                            "TemplateLanguage": true,
+                            "Subject": "Confirm Beta Tester",
+                            "Variables": {
+                                "username": user,
+                                "discord": discord+"#"+discordtag,
+                                "validatelink": "https://liteanticheat.com/betatester/"+result.accessToken
+                            }
+                        }
+                    ]
+                }
+
+                sendEmail.request(Emails).then((handlePostResponse) => {
+                    console.log("Mail sent to " + email);
+                    console.log(handlePostResponse.body);
+
+                }).catch((handleError) => {
+                    console.log(handleError)
+                });
+                res.send("updated")
+            }
+        });
+    }
+
+})
+
+app.post('/verifiedaccount/account', (req, res) => {
     var token = req.body.token;
     const db = lacdb.collection('clients');
     if (token) {
@@ -551,6 +602,26 @@ app.post('/verifiedaccount', (req, res) => {
                     db.updateOne({ 'verifiedToken': token }, { $set: { 'verified': true } }, (err, ress) => {
                         res.send({ "result": "verified" })
                     })
+                }
+            } else {
+                res.send({ "error": "accounts does exists" })
+            }
+        })
+    }
+})
+
+app.post('/verifiedaccount/betatester', (req, res) => {
+    var token = req.body.token;
+    const db = lacdb.collection('clients');
+    if (token) {
+        db.findOne({ 'verifiedToken': token }, (err, result) => {
+            if (result) {
+                if (result.verified) {
+                    usersCollections.updateOne({ "email": result.email }, { $set: { "betatester": 2 } })
+                    res.send({ "result": "verified" })
+                } else {
+                    usersCollections.updateOne({ "email": result.email }, { $set: { "betatester": 0 } })
+                    res.send({"error": "pls, verify your account"})
                 }
             } else {
                 res.send({ "error": "accounts does exists" })
@@ -819,7 +890,8 @@ app.post('/getuser', (req, res) => {
                 capes: result.capes,
                 id: result._id,
                 signupdate: result.signupdate,
-                photourl: result.photourl
+                photourl: result.photourl,
+                betatester: result.betatester
             }
             res.send(get);
         })
@@ -848,7 +920,8 @@ function getUser(name) {
                         skin: result.skin,
                         capes: result.capes,
                         id: result._id,
-                        signupdate: result.signupdate
+                        signupdate: result.signupdate,
+                        betatester: result.betatester
                     }
                     resolve(user);
                 } else {
@@ -886,7 +959,8 @@ function oauth(email, password) {
                                     sessionid: token,
                                     timestamp: Date.now(),
                                     signupdate: result.signupdate,
-                                    verified: result.verified
+                                    verified: result.verified,
+                                    betatester: result.betatester
                                 })
                                 if (result.verified) {
                                     usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
@@ -921,7 +995,8 @@ function oauth(email, password) {
                                     sessionid: token,
                                     timestamp: Date.now(),
                                     signupdate: result.signupdate,
-                                    verified: result.verified
+                                    verified: result.verified,
+                                    betatester: result.betatester
                                 })
                                 usersCollections.updateOne({ "email": result.email }, { $set: { "last_login": Date.now(), "status": true } })
                                 resolve(token)
@@ -1004,4 +1079,13 @@ function getClientIP(req, res) {
             message: 'got error'
         });
     }
+}
+
+function haveThreeAccount(ip) {
+    const usersCollections = lacdb.collection('clients');
+
+    usersCollections.find({ 'registrationIP': ip }).toArray((err, result) => {
+        console.log(result.length);
+
+    })
 }
