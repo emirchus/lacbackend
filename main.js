@@ -505,7 +505,8 @@ app.post('/signin', (req, res) => {
 })
 
 app.post('/discord', (req, res) => {
-    if (req.body.code) {
+    let code = req.body.code;
+    if (code) {
         var CLIENT_ID = '488405638326779914'
         var CLIENT_SECRET = '8jchGWTOlJVH__EHR0F6WvhPQVX3johf'
         var REDIRECT_URI = 'https://liteanticheat.com/forms/betatester';
@@ -513,7 +514,7 @@ app.post('/discord', (req, res) => {
             'client_id': CLIENT_ID,
             'client_secret': CLIENT_SECRET,
             'grant_type': 'authorization_code',
-            'code': req.body.code,
+            'code': code,
             'redirect_uri': REDIRECT_URI,
             'scope': 'identify email connections'
         }
@@ -521,8 +522,9 @@ app.post('/discord', (req, res) => {
         var API_ENDPOINT = 'https://discordapp.com/api/v6/oauth2/token'
         fetch(API_ENDPOINT, {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', body: new FormData(data) }
-        }).then(res => { return res.text() })
+        }).then(res => { return res.json() })
             .then(json => {
+                console.log(json);                
                 res.send(json)
             })
     }
