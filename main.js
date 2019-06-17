@@ -545,6 +545,7 @@ app.post('/betatester/add', (req, res) => {
     var emailss = req.body.email;
     var discord = req.body.discordname;
     var discordtag = req.body.discordtag
+    const usersCollections = lacdb.collection('clients');
     if (user && discord && discordtag && emailss) {
         usersCollections.findOne({ 'usernamelower': usernamelower }, (err, result) => {
             if (betatester == 0) {
