@@ -521,19 +521,19 @@ app.post('/discord', (req, res) => {
 
         request.post({ url: API_ENDPOINT, formData: data }, function (err, httpResponse, body) {
             if (err) {
-                return console.error('upload failed:', err);
+                console.error('upload failed:', err);
             }
             console.log('Upload successful!  Server responded with:', body);
             request.get('http://discordapp.com/api/users/@me', {
                 'auth': {
                     'bearer': 'bearerToken'
                 }
-            }, (errs, rep, bod => {
+            }, (errs, rep, bod) => {
                 if (errs) {
-                    return console.error('upload failed:', errs);
+                    console.error('upload failed:', errs);
                 }
                 res.send(bod)
-            }));
+            });
         });
     }
 })
