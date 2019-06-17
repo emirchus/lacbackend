@@ -524,10 +524,17 @@ app.post('/discord', (req, res) => {
                 return console.error('upload failed:', err);
             }
             console.log('Upload successful!  Server responded with:', body);
-            res.send(body)
+            fetch("http://discordapp.com/api/users/@me", {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + body.access_token
+                }
+            }).then(resds => { return resds.json() })
+                .then(jsoss => {
+                    res.send(jsoss)
+                })
         });
     }
-
 })
 
 
