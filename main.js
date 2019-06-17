@@ -526,7 +526,7 @@ app.post('/discord', (req, res) => {
             console.log('Upload successful!  Server responded with:', body);
             request.get('http://discordapp.com/api/users/@me', {
                 'auth': {
-                    'bearer': 'bearerToken'
+                    'bearer': JSON.parse(body).access_token
                 }
             }, (errs, rep, bod) => {
                 if (errs) {
