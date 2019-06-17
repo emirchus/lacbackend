@@ -521,7 +521,7 @@ app.post('/discord', (req, res) => {
         var API_ENDPOINT = 'https://discordapp.com/api/v6/oauth2/token'
         fetch(API_ENDPOINT, {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', body: new FormData(data) }
-        }).then(res => { return res.json() })
+        }).then(res => { return res.text() })
             .then(json => {
                 res.send(json)
             })
