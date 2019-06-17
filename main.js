@@ -547,44 +547,46 @@ app.post('/betatester/add', (req, res) => {
     var discordtag = req.body.discordtag
     const usersCollections = lacdb.collection('clients');
     if (user && discord && discordtag && emailss) {
-        usersCollections.findOne({ 'usernamelower': usernamelower }, (err, result) => {
-            if (betatester == 0) {
-                usersCollections.updateOne({ "email": result.email }, { $set: { "betatester": 1 } })
-                var sendEmail = mailjet.post("send", { 'version': 'v3.1' })
+        usersCollections.findOne({ 'usernamelower': user.toLowerCase() }, (err, result) => {
+            if(result){
+                if (result.betatester == 0) {
+                    usersCollections.updateOne({ "email": result.email }, { $set: { "betatester": 1 } })
+                    var sendEmail = mailjet.post("send", { 'version': 'v3.1' })
 
-                var Emails = {
-                    "Messages": [
-                        {
-                            "From": {
-                                "Email": "support@liteanticheat.com",
-                                "Name": "LiteAntiCheat"
-                            },
-                            "To": [
-                                {
-                                    "Email": emailss,
-                                    "Name": user
+                    var Emails = {
+                        "Messages": [
+                            {
+                                "From": {
+                                    "Email": "support@liteanticheat.com",
+                                    "Name": "LiteAntiCheat"
+                                },
+                                "To": [
+                                    {
+                                        "Email": emailss,
+                                        "Name": user
+                                    }
+                                ],
+                                "TemplateID": 876183,
+                                "TemplateLanguage": true,
+                                "Subject": "Confirm Beta Tester",
+                                "Variables": {
+                                    "username": user,
+                                    "discord": discord + "#" + discordtag,
+                                    "validatelink": "https://liteanticheat.com/betatester/" + result.accessToken
                                 }
-                            ],
-                            "TemplateID": 876183,
-                            "TemplateLanguage": true,
-                            "Subject": "Confirm Beta Tester",
-                            "Variables": {
-                                "username": user,
-                                "discord": discord+"#"+discordtag,
-                                "validatelink": "https://liteanticheat.com/betatester/"+result.accessToken
                             }
-                        }
-                    ]
+                        ]
+                    }
+
+                    sendEmail.request(Emails).then((handlePostResponse) => {
+                        console.log("Mail sent to " + email);
+                        console.log(handlePostResponse.body);
+
+                    }).catch((handleError) => {
+                        console.log(handleError)
+                    });
+                    res.send("updated")
                 }
-
-                sendEmail.request(Emails).then((handlePostResponse) => {
-                    console.log("Mail sent to " + email);
-                    console.log(handlePostResponse.body);
-
-                }).catch((handleError) => {
-                    console.log(handleError)
-                });
-                res.send("updated")
             }
         });
     }
