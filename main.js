@@ -9,6 +9,7 @@ var request = require('request').defaults({
     encoding: null
 });
 const fetch = require('node-fetch');
+const request = require('request');
 
 var accountsTokens = [];
 
@@ -520,13 +521,14 @@ app.post('/discord', (req, res) => {
         }
         //var ssss = "?client_id=" + CLIENT_ID + "&client_secret=" + client_secret +"&grant_type="
         var API_ENDPOINT = 'https://discordapp.com/api/v6/oauth2/token'
-        fetch(API_ENDPOINT, {
-            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', body: new FormData(data) }
-        }).then(resp => { return resp.text() })
-            .then(json => {
-                console.log(json);                
-                res.send(json)
-            })
+
+        request.post({ url: API_ENDPOINT, formData: data }, function (err, httpResponse, body) {
+            if (err) {
+                return console.error('upload failed:', err);
+            }
+            console.log('Upload successful!  Server responded with:', body);
+            res.send(body)
+        });
     }
 
 })
