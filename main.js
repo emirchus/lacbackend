@@ -527,7 +527,7 @@ app.post('/discord', (req, res) => {
             fetch("http://discordapp.com/api/users/@me", {
                 method: 'POST',
                 headers: {
-                    'Authorization': "Bearer " + body.access_token
+                    'Authorization': body.access_token
                 }
             }).then(resds => { return resds.json() })
                 .then(jsoss => {
